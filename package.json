@@ -1,0 +1,35 @@
+{
+  "name": "100xcoders-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akshaykurhekar/100xcoders-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/akshaykurhekar/100xcoders-backend/issues"
+  },
+  "homepage": "https://github.com/akshaykurhekar/100xcoders-backend#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.99.2",
+    "axios": "^1.13.6",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "form-data": "^4.0.5",
+    "viem": "^2.47.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
