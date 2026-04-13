@@ -209,24 +209,12 @@ router.post("/", async (req, res) => {
     });
 
   } catch (err) {
-
-    console.error("Mint error:", err?.message);
-
-    if (imagePath && fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath);
-    }
-
-    if (err?.message?.includes("Certificate already minted")) {
-      return res.status(400).json({
-        error: "Certificate already minted for this course"
-      });
-    }
-
-    res.status(500).json({
-      error: "Mint failed"
-    });
-
-  }
+  console.error("MINT ERROR:", err);
+  res.status(500).json({
+    error: err.message,
+    stack: err.stack // optional (remove later)
+  });
+}
 
 });
 

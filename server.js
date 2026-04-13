@@ -14,7 +14,11 @@ Middleware
 ---------------------------------------
 */
 
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:8080"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
 /* Increase payload size for certificate images */
 app.use(express.json({ limit: "10mb" }));
