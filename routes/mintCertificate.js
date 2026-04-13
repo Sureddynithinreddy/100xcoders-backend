@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import axios from "axios";
 import FormData from "form-data";
-import { walletClient, publicClient } from "../config/web3Client.js"; // ✅ added publicClient
+import { walletClient, publicClient } from "../config/web3Client.js";
 import supabase from "../config/supabaseClient.js";
 
 const router = express.Router();
@@ -21,10 +21,14 @@ const certificateABI = JSON.parse(
 );
 
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
+const PINATA_JWT = process.env.PINATA_JWT;
+const PINATA_API_URL = process.env.PINATA_API_URL;         // https://api.pinata.cloud
+const PINATA_GATEWAY_URL = process.env.PINATA_GATEWAY_URL; // https://gateway.pinata.cloud
 
-if (!CONTRACT_ADDRESS) {
-  throw new Error("CONTRACT_ADDRESS is not set in .env");
-}
+if (!CONTRACT_ADDRESS) throw new Error("CONTRACT_ADDRESS is not set in .env");
+if (!PINATA_JWT) throw new Error("PINATA_JWT is not set in .env");
+if (!PINATA_API_URL) throw new Error("PINATA_API_URL is not set in .env");
+if (!PINATA_GATEWAY_URL) throw new Error("PINATA_GATEWAY_URL is not set in .env");
 
 /*
 -----------------------------------------
@@ -69,20 +73,18 @@ router.post("/", async (req, res) => {
     formData.append("file", fs.createReadStream(imagePath));
 
     const imageUpload = await axios.post(
-      "https://api.pinata.cloud/pinning/pinFileToIPFS",
+      `${PINATA_API_URL}/pinning/pinFileToIPFS`,
       formData,
       {
         headers: {
           ...formData.getHeaders(),
-          Authorization: `Bearer ${process.env.PINATA_JWT}`
+          Authorization: `Bearer ${PINATA_JWT}`
         }
       }
     );
 
     const imageHash = imageUpload.data.IpfsHash;
-
-    // ✅ Back to Pinata gateway — this worked for image rendering
-    const imageURI = `https://gateway.pinata.cloud/ipfs/${imageHash}`;
+    const imageURI = `${PINATA_GATEWAY_URL}/ipfs/${imageHash}`;
 
     console.log("Image URI:", imageURI);
 
@@ -115,20 +117,18 @@ router.post("/", async (req, res) => {
     */
 
     const metadataUpload = await axios.post(
-      "https://api.pinata.cloud/pinning/pinJSONToIPFS",
+      `${PINATA_API_URL}/pinning/pinJSONToIPFS`,
       metadata,
       {
         headers: {
-          Authorization: `Bearer ${process.env.PINATA_JWT}`,
+          Authorization: `Bearer ${PINATA_JWT}`,
           "Content-Type": "application/json"
         }
       }
     );
 
     const metadataHash = metadataUpload.data.IpfsHash;
-
-    // ✅ Back to Pinata gateway for metadataURI — this worked before
-    const metadataURI = `https://gateway.pinata.cloud/ipfs/${metadataHash}`;
+    const metadataURI = `${PINATA_GATEWAY_URL}/ipfs/${metadataHash}`;
 
     console.log("Metadata URI:", metadataURI);
 
@@ -149,18 +149,17 @@ router.post("/", async (req, res) => {
 
     /*
     -----------------------------------------
-    ✅ Wait for receipt & extract Token ID
+    Wait for receipt & extract Token ID
     -----------------------------------------
     */
 
     const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
 
-    // ERC-721 Transfer event: Transfer(address from, address to, uint256 tokenId)
-    const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+    //const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
     const transferLog = receipt.logs.find(
-      (log) => log.topics[0] === TRANSFER_TOPIC
-    );
+  (log) => log.topics[0] === process.env.TRANSFER_TOPIC
+);
 
     const tokenId = transferLog
       ? BigInt(transferLog.topics[3]).toString()
@@ -183,8 +182,8 @@ router.post("/", async (req, res) => {
         course_name: courseName,
         metadata_uri: metadataURI,
         tx_hash: txHash,
-        token_id: tokenId,                      // ✅ add this
-    contract_address: CONTRACT_ADDRESS
+        token_id: tokenId,
+        contract_address: CONTRACT_ADDRESS
       });
 
     if (dbError) {
@@ -201,7 +200,6 @@ router.post("/", async (req, res) => {
       fs.unlinkSync(imagePath);
     }
 
-    // ✅ Now returns tokenId and contractAddress too
     res.json({
       success: true,
       txHash,
@@ -218,7 +216,6 @@ router.post("/", async (req, res) => {
       fs.unlinkSync(imagePath);
     }
 
-    // ✅ Handle already minted gracefully
     if (err?.message?.includes("Certificate already minted")) {
       return res.status(400).json({
         error: "Certificate already minted for this course"

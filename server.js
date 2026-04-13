@@ -33,6 +33,9 @@ app.get("/", (req, res) => {
     service: "NFT Certificate Minting"
   });
 });
+app.get("/api/health", (req, res) => {
+  res.json({ status: "OK" });
+});
 
 /*
 ---------------------------------------
