@@ -10,16 +10,24 @@ const app = express();
 
 /*
 ---------------------------------------
-Middleware
+CORS
 ---------------------------------------
 */
 
-app.use(cors({
+const corsOptions = {
   origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-}));
-app.options("*", cors());
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // ← handle ALL preflight requests
+
+/*
+---------------------------------------
+Middleware
+---------------------------------------
+*/
 
 /* Increase payload size for certificate images */
 app.use(express.json({ limit: "10mb" }));
@@ -38,6 +46,7 @@ app.get("/", (req, res) => {
     service: "NFT Certificate Minting"
   });
 });
+
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK" });
 });
