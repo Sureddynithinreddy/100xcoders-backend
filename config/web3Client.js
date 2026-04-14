@@ -10,11 +10,11 @@ const account = privateKeyToAccount(process.env.PLATFORM_PRIVATE_KEY);
 export const walletClient = createWalletClient({
   account,
   chain: sepolia,
-  transport: http()
+  transport: http(process.env.RPC_URL) // ✅ added RPC here
 });
 
 // ✅ added publicClient
 export const publicClient = createPublicClient({
   chain: sepolia,
-  transport: http()
+  transport: http(process.env.RPC_URL) // ✅ added RPC here
 });
