@@ -59,7 +59,7 @@ router.post("/", async (req, res) => {
     const base64Data = certificateImage.replace(/^data:image\/png;base64,/, "");
     const imageBuffer = Buffer.from(base64Data, "base64");
 
-    imagePath = `./certificate-${Date.now()}.png`;
+    imagePath = `/tmp/certificate-${Date.now()}.png`;
 
     fs.writeFileSync(imagePath, imageBuffer);
 
