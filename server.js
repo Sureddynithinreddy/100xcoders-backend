@@ -21,7 +21,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options(/.*/, cors(corsOptions)); // ✅ regex wildcard — compatible with Express 5 / path-to-regexp v8+
+app.options(/.*/, cors(corsOptions));// ✅ regex wildcard — compatible with Express 5 / path-to-regexp v8+
 
 /*
 ---------------------------------------
